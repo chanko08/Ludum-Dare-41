@@ -10,7 +10,9 @@ function DungeonRoomState:enter(previous_state, template)
 
     self.world = bump.newWorld()
     self.entities = {}
-    self:load_entity_classes()
+    self.ENTITIES = self:load_folder('entities')
+    self.BLOCK_BEHAVIORS = self:load_folder('block_behaviors')
+    self.POWER_UP_BEHAVIORS = self:load_folder('power_up_behaviors')
     self:load_template(self.template)
 end
 
@@ -28,8 +30,10 @@ end
 
 function DungeonRoomState:update(dt)
     for entity,i in pairs(self.entities) do
-        local entity_is_dead = entity:update(self.world, dt)
-        if entity_is_dead then
+        if entity.update then
+            entity:update(self.world, dt)
+        end
+        if entity.is_dead then
             self.entities[entity] = nil
             self.world:remove(entity)
 
@@ -41,9 +45,19 @@ function DungeonRoomState:update(dt)
 end
 
 function DungeonRoomState:draw()
+    for entity, alive in pairs(self.entities) do
+        if entity.tile then
+            love.graphics.draw(entity.tile.image, entity.tile.quad, entity.x, entity.y)
+        elseif entity.draw then
+            entity:draw()
+        end
+    end
+
+    --[[
     for entity,i in pairs(self.entities) do
         entity:draw(dt)
     end
+    ]]
 end
 
 function DungeonRoomState:keypressed(key)
@@ -57,27 +71,79 @@ function DungeonRoomState:add_entity(entity)
     entity:add_to_world(self.world)
 end
 
-function DungeonRoomState:load_entity_classes()
-    self.ENTITIES = {}
-    for i, file_name in ipairs(love.filesystem.getDirectoryItems('entities')) do
-        file_name = 'entities/' .. file_name
+function DungeonRoomState:load_folder(folder)
+    folder_items = {}
+    for i, file_name in ipairs(love.filesystem.getDirectoryItems(folder)) do
+        file_path = folder .. '/' .. file_name
         local ok, file, room
-        ok, file = pcall(love.filesystem.load, file_name)
+        ok, file = pcall(love.filesystem.load, file_path)
         
         if not ok then
-            error('Problem occurred loading entity file: ' .. file_name .. '\n' .. file)
+            error('Problem occurred loading entity file: ' .. file_path .. '\n' .. file)
         end
 
         
-        ok, entity_class = pcall(file)
+        ok, file_code = pcall(file)
         if not ok then
-            error('Entity file failed to compile: ' .. file_name .. '\n' .. entity_class)
+            error('Entity file failed to compile: ' .. file_path .. '\n' .. entity_class)
         end
 
-        print(inspect(entity_class))
-        self.ENTITIES[entity_class.name] = entity_class
+        folder_items[file_name] = file_code
     end
+
+    return folder_items
 end
+
+
+function DungeonRoomState:load_tileset(tileset)
+    -- load the tileset image
+    
+    local image = love.graphics.newImage('dungeon_rooms/' .. tileset.image)
+
+    local numtilerows = math.floor(tileset.imagewidth / tileset.tilewidth)
+    local numtilecols = math.floor(tileset.imageheight / tileset.tileheight)
+
+    local ts = {}
+    for row=0,numtilerows-1 do
+        for col=0,numtilecols-1 do
+            
+            local x = row * tileset.tilewidth
+            local y = col * tileset.tileheight
+
+            local tile = {}
+            tile.quad = love.graphics.newQuad(
+                x,
+                y,
+                tileset.tilewidth,
+                tileset.tileheight,
+                tileset.imagewidth,
+                tileset.imageheight
+            )
+            tile.image = image
+            tile.width = tileset.tilewidth
+            tile.height = tileset.tileheight
+            tile.local_id  = col * numtilecols + row
+            tile.global_id = tile.local_id + tileset.firstgid 
+            tile.tileset_name = tileset.name
+            
+            ts[tile.local_id] = tile
+        end
+    end
+
+    for i, property in ipairs(tileset.tiles) do
+        ts[property.id].properties = property.properties
+    end
+
+
+    local tiles = {}
+    for i, tile in pairs(ts) do
+        print(inspect(tile))
+        tiles[tile.global_id] = tile
+    end
+
+    return tiles
+end
+
 
 function DungeonRoomState:load_template(template)
 
@@ -95,59 +161,110 @@ function DungeonRoomState:load_template(template)
     end
 
 
-
-
-
-    local room
-    for i, layer in ipairs(room_template.layers) do
-        if layer.name == 'blocks' then
-            room = layer
-            break
+    -- load the two accepted tilesets in
+    local block_behavior_tileset
+    local power_up_behavior_tileset
+    local block_image_tileset
+    for i, ts in ipairs(room_template.tilesets) do
+        if ts.name == 'block_behaviors' then
+            block_behavior_tileset = self:load_tileset(ts)
+        elseif ts.name == 'power_up_behaviors' then
+            power_up_behavior_tileset = self:load_tileset(ts)
+        elseif ts.name == 'block_images' then
+            block_image_tileset = self:load_tileset(ts)
         end
     end
 
-    if not room then
-        error('Unable to find "room" layer in template:' .. template)
+    -- load the three accepted layers in
+    local blocks
+    local power_ups
+    local block_behaviors
+    for i, layer in ipairs(room_template.layers) do
+        if layer.name == 'blocks' then
+            blocks = layer
+        elseif layer.name == 'power_ups' then
+            power_ups = layer
+        elseif layer.name == 'block_behaviors' then
+            block_behaviors = layer
+        end
     end
 
+    if not blocks then
+        error('Unable to find "blocks" layer in dungeon room template:' .. template)
+    end
+
+    if not power_ups then
+        error('Unable to find "power_ups" layer in dungeon room template:' ..  template)
+    end
+
+    if not block_behaviors then
+        error('Unable to find "block_behaviors" layer in dungeon room template:' ..  template)
+    end
+
+
+    if not block_behavior_tileset then
+        error('Unable to find "block_behaviors" tileset in dungeon room template:' .. template)
+    end
+
+    if not power_up_behavior_tileset then
+        error('Unable to find "power_up_behaviors" tileset in dungeon room template:' .. template)
+    end
+
+    if not block_image_tileset then
+        error('Unable to find "block_images" tileset in dungeon room template:' .. template)
+    end  
+
+
+    -- add the block image to the block from the block image layer
     local tile_height = room_template.tileheight
     local tile_width = room_template.tilewidth
 
     local block_ids = {}
     local block_positions = {}
-    for i, block_id in ipairs(room.data) do
+    local block_objects = {}
+    for i, block_id in ipairs(blocks.data) do
         if block_id > 0 then
-            block_ids[block_id] = true
-            local x = (i - 1) % room.width
-            local y = math.floor((i - 1) / room.width)
-            table.insert(block_positions, {
-                id = block_id,
+            local x = (i - 1) % blocks.width * tile_width
+            local y = math.floor((i - 1) / blocks.width) * tile_height
+            local tile = block_image_tileset[block_id]
+            local behavior = block_behavior_tileset[block_behaviors.data[i]]
+            local power_up = power_up_behavior_tileset[power_ups.data[i]]
+
+            if not tile then
+                error('WARNING: Block id does not match any block image ids')
+            end
+            if not behavior then
+                print('WARNING: Block id does not match any block behavior ids')
+            end
+            if not power_up then
+                print('WARNING: Block id does not match any power up ids')
+            end
+
+            local behavior_action
+            if behavior and behavior.properties.name then
+                behavior_action = self.BLOCK_BEHAVIORS[behavior.properties.name]
+            else
+                -- if no behavior given, default to a do-nothing behavior
+                behavior_action = function() end
+            end
+            table.insert(block_objects, {
+                index = i,
+                block_id = block_id,
                 x = x,
-                y = y
+                y = y,
+                w = tile_width,
+                h = tile_height,
+                tile = tile,
+                behavior = behavior_action,
+                power_up = power_up,
+                is_block = true
             })
         end
     end
 
-
-    block_entity_classes = {}
-    for entity_name,entity_class in pairs(self.ENTITIES) do
-        if entity_class.is_block then
-            table.insert(block_entity_classes, entity_class)
-        end
-    end
-
-
-    for block_id,v in pairs(block_ids) do
-        block_ids[block_id] = block_entity_classes[love.math.random(#block_entity_classes)]
-    end
-
-    
-
-
-    local entities = {}
-    for i, block_data in ipairs(block_positions) do
-        local block = block_ids[block_data.id](tile_width * block_data.x, tile_height * block_data.y , tile_width, tile_height)
-        self:add_entity(block)
+    for i, blk in ipairs(block_objects) do
+        self.entities[blk] = true
+        self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
     end
 
     -- load initial paddle into room
@@ -157,26 +274,75 @@ function DungeonRoomState:load_template(template)
     player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
     player_start_y = love.graphics.getHeight( ) - tile_height
 
-    local paddle = self.ENTITIES['paddle'](player_start_x, player_start_y, player_width, player_height)
-    self:add_entity(paddle)
+    local paddle = self.ENTITIES['paddle.lua'](player_start_x, player_start_y, player_width, player_height)
+    self.entities[paddle] = true
+    self.world:add(paddle, paddle.x, paddle.y, paddle.w, paddle.h)
 
 
     -- load barriers around the game window
     -- left barrier
     local blk
-    blk = self.ENTITIES['ImmortalBlock'](-25, 0, 25, love.graphics.getHeight( ))
-    self:add_entity(blk)
+    blk = {
+        index = nil,
+        block_id = block_id,
+        x = -25,
+        y = 0,
+        w = 25,
+        h = love.graphics.getHeight(),
+        tile = nil,
+        behavior = self.BLOCK_BEHAVIORS['immortal.lua'],
+        power_up = nil,
+        is_block = true
+    }
+    self.entities[blk] = true
+    self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
     -- right barrier
-    blk = self.ENTITIES['ImmortalBlock'](love.graphics.getWidth( ), 0, 25, love.graphics.getHeight( ))
-    self:add_entity(blk)
+    blk = {
+        index = nil,
+        block_id = block_id,
+        x = love.graphics.getWidth( ),
+        y = 0,
+        w = 25,
+        h = love.graphics.getHeight( ),
+        tile = nil,
+        behavior = self.BLOCK_BEHAVIORS['immortal.lua'],
+        power_up = nil,
+        is_block = true
+    }
+    self.entities[blk] = true
+    self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
     -- top barrier
-    blk = self.ENTITIES['ImmortalBlock'](-25, -25, love.graphics.getWidth( )+25, 25)
-    self:add_entity(blk)
+    blk = {
+        index = nil,
+        block_id = block_id,
+        x = -25,
+        y = -25,
+        w = love.graphics.getWidth( )+25,
+        h = 25,
+        tile = nil,
+        behavior = self.BLOCK_BEHAVIORS['immortal.lua'],
+        power_up = nil,
+        is_block = true
+    }
+    self.entities[blk] = true
+    self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
-    blk = self.ENTITIES['LoseBlock'](-25, love.graphics.getHeight( ), love.graphics.getWidth( )+25, 25)
-    self:add_entity(blk)
+    blk = {
+        index = nil,
+        block_id = block_id,
+        x = -25,
+        y = love.graphics.getHeight(),
+        w = love.graphics.getWidth() + 25,
+        h = 25,
+        tile = nil,
+        behavior = self.BLOCK_BEHAVIORS['kill_ball.lua'],
+        power_up = nil,
+        is_block = true
+    }
+    self.entities[blk] = true
+    self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
 
     -- load initial ball into room
@@ -187,7 +353,7 @@ function DungeonRoomState:load_template(template)
     local ball_start_y = player_start_y - ball_height
     
 
-    local ball = self.ENTITIES['ball'](
+    local ball = self.ENTITIES['ball.lua'](
         ball_start_x,
         ball_start_y,
         ball_width,
@@ -195,8 +361,8 @@ function DungeonRoomState:load_template(template)
         ball_start_vx,
         ball_start_vy
     )
-    self:add_entity(ball)
-
+    self.entities[ball] = true
+    self.world:add(ball, ball.x, ball.y, ball.w, ball.h)    
 
     return entities
 end

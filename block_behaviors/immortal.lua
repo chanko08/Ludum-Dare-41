@@ -1,0 +1,1 @@
+return function(block, ball) end

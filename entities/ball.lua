@@ -65,7 +65,8 @@ function Ball:block_collision(col)
     self.vy = flipped_vel.x
 
     local other = col.other
-    other:on_ball_collision(self)
+    print(inspect(other))
+    other:behavior(self)
 
 end
 
