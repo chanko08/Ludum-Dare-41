@@ -42,7 +42,12 @@ function Ball:update(world, dt)
         self,
         self.x + self.vx*dt,
         self.y + self.vy*dt,
-        function(item, other) return "bounce" end
+        function(item, other)
+            if other.is_powerup then
+                return 'cross'
+            end
+            return "bounce"
+        end
     )
     self.x = actualX
     self.y = actualY
@@ -65,7 +70,6 @@ function Ball:block_collision(col)
     self.vy = flipped_vel.x
 
     local other = col.other
-    print(inspect(other))
     other:behavior(self)
 
 end

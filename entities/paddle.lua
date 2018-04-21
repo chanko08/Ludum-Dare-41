@@ -15,7 +15,12 @@ function Paddle:add_to_world(world)
 end
 
 function Paddle:move(world, x, y, dx, dy)
-    local actualX, actualY, cols, len = world:move(self, self.x + dx, self.y)
+    local actualX, actualY, cols, len = world:move(self, self.x + dx, self.y, function(item, other)
+        if other.is_powerup then
+            return 'cross'
+        end
+        return 'touch'
+    end)
     self.x = actualX
     self.y = actualY
 end

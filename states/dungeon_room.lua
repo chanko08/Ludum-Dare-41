@@ -39,6 +39,11 @@ function DungeonRoomState:update(dt)
 
             if entity.is_ball then
                 print("you lost!")
+            elseif entity.is_block and entity.power_up then
+                print(inspect(entity))
+                print(inspect(entity.power_up))
+                self.entities[entity.power_up] = true
+                self.world:add(entity.power_up, entity.power_up.x, entity.power_up.y, entity.power_up.w, entity.power_up.h)
             end
         end
     end
@@ -245,8 +250,19 @@ function DungeonRoomState:load_template(template)
                 behavior_action = self.BLOCK_BEHAVIORS[behavior.properties.name]
             else
                 -- if no behavior given, default to a do-nothing behavior
-                behavior_action = function() end
+                behavior_action = self.BLOCK_BEHAVIORS['immortal.lua']
             end
+
+            local power_up_obj
+            if power_up and power_up.properties.name then
+                power_up_action = self.POWER_UP_BEHAVIORS[power_up.properties.name]
+                power_up.action = power_up_action
+                power_up_obj = self.ENTITIES['powerup.lua'](x, y, tile_width, tile_height, power_up, state)
+            end
+
+
+
+
             table.insert(block_objects, {
                 index = i,
                 block_id = block_id,
@@ -256,7 +272,7 @@ function DungeonRoomState:load_template(template)
                 h = tile_height,
                 tile = tile,
                 behavior = behavior_action,
-                power_up = power_up,
+                power_up = power_up_obj,
                 is_block = true
             })
         end
