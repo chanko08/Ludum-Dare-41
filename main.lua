@@ -1,12 +1,13 @@
 -- Globally defined because these will be used literally everywhere
 class = require 'lib.hump.class'
 gs = require 'lib.hump.gamestate'
+vector = require 'lib.hump.vector'
 inspect = require 'lib.inspect.inspect'
 
 
-local GameState = require 'states.game'
+local DungeonRoomState = require 'states.dungeon_room'
 
 function love.load()
     gs.registerEvents()
-    gs.switch(GameState)
+    gs.switch(DungeonRoomState, 'dungeon_rooms/dungeon1.lua')
 end
