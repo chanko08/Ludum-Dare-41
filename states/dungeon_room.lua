@@ -61,6 +61,7 @@ function DungeonRoomState:load_entities(template)
 
 
     local kill_block = function(block, ball) block.is_dead = true end
+    local kill_ball = function(block, ball) ball.is_dead = true end
 
     local ok, file, room
     ok, file = pcall(love.filesystem.load, template)
@@ -139,6 +140,9 @@ function DungeonRoomState:load_entities(template)
 
     -- top barrier
     blk = Block(-25, -25, love.graphics.getWidth( )+25, 25)
+    entities[blk] = true
+
+    blk = Block(-25, love.graphics.getHeight( ), love.graphics.getWidth( )+25, 25, kill_ball)
     entities[blk] = true
 
 
