@@ -21,6 +21,13 @@ function Ball:draw()
     love.graphics.setColor(0, 0, 1)
     love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
     love.graphics.setColor(r, g, b, a)
+
+    local ball_center_x = self.x + self.w / 2
+    local ball_center_y = self.y + self.h / 2
+    local r, g, b, a = love.graphics.getColor( )
+    love.graphics.setColor(0, 1, 1)
+    love.graphics.circle('fill', ball_center_x, ball_center_y, self.w / 4)
+    love.graphics.setColor(r, g, b, a)
 end
 
 function Ball:update(world, dt)
@@ -33,19 +40,51 @@ function Ball:update(world, dt)
     self.x = actualX
     self.y = actualY
     for i=1,len do
-        local normal = cols[i].normal
-        local flipped_vel = vector(self.vy, self.vx)
-        flipped_vel = flipped_vel:mirrorOn(normal)
-        self.vx = flipped_vel.y
-        self.vy = flipped_vel.x
-
-        local other = cols[i].other
-        if other.is_block then
-            other:on_ball_collision(self)
+        if cols[i].other.is_block then
+            self:block_collision(cols[i])
+        elseif cols[i].other.is_paddle then
+            self:paddle_collision(cols[i])
         end
     end
 
     return self.is_dead
+end
+
+function Ball:block_collision(col)
+    local normal = col.normal
+    local flipped_vel = vector(self.vy, self.vx)
+    flipped_vel = flipped_vel:mirrorOn(normal)
+    self.vx = flipped_vel.y
+    self.vy = flipped_vel.x
+
+    local other = col.other
+    other:on_ball_collision(self)
+end
+
+function Ball:paddle_collision(col)
+    local normal = col.normal
+    local paddle = col.other
+
+    if normal.x ~= 0 then
+        self:block_collision(col)
+        return
+    end
+
+    local ball_center_x = self.x + self.w / 2
+    local paddle_center_x = paddle.x + paddle.w / 2
+
+    ball_center_x = ball_center_x - paddle_center_x
+    local direction_change = math.sign(ball_center_x) * math.min(math.abs(ball_center_x / (paddle.w / 2)))
+
+    local max_direction = 70 * math.pi / 180
+    local angle = direction_change * max_direction
+
+    local old_ball_direction = vector(self.vx, self.vy)
+    local new_ball_direction = vector(0, -1)
+    new_ball_direction:rotateInplace(angle)
+    new_ball_direction = new_ball_direction * old_ball_direction:len()
+    self.vx = new_ball_direction.x
+    self.vy = new_ball_direction.y
 end
 
 return Ball

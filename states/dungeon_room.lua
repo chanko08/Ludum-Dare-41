@@ -119,7 +119,7 @@ function DungeonRoomState:load_entities(template)
 
     -- load initial paddle into room
     -- assume paddle always starts in the middle of the bottom row of the template
-    player_width = tile_width * 3
+    player_width = tile_width * 10
     player_height = 3 * math.floor(tile_height / 4)
     player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
     player_start_y = love.graphics.getHeight( ) - tile_height
