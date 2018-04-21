@@ -74,6 +74,7 @@ function DungeonRoomState:load_entity_classes()
             error('Entity file failed to compile: ' .. file_name .. '\n' .. entity_class)
         end
 
+        print(inspect(entity_class))
         self.ENTITIES[entity_class.name] = entity_class
     end
 end
@@ -99,7 +100,7 @@ function DungeonRoomState:load_template(template)
 
     local room
     for i, layer in ipairs(room_template.layers) do
-        if layer.name == 'room' then
+        if layer.name == 'blocks' then
             room = layer
             break
         end
