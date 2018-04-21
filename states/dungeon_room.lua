@@ -8,12 +8,31 @@ function DungeonRoomState:enter(previous_state, template)
     self.template = template
     self.game_started = false
 
-    self.entities = self:load_entities(self.template)
-
     self.world = bump.newWorld()
-    for entity, i in pairs(self.entities) do
-        entity:add_to_world(self.world)
+    self.entities = {}
+   
+
+    self.ENTITIES = {}
+    for i, file_name in ipairs(love.filesystem.getDirectoryItems('entities')) do
+        file_name = 'entities/' .. file_name
+        local ok, file, room
+        ok, file = pcall(love.filesystem.load, file_name)
+        
+        if not ok then
+            error('Entity file for dungeon does not exist: ' .. file_name)
+        end
+
+        
+        ok, entity_class = pcall(file)
+        if not ok then
+            error('Entity file failed to compile: ' .. file_name .. '\n' .. entity_class)
+        end
+
+        self.ENTITIES[entity_class.name] = entity_class
     end
+
+
+     self:load_template(self.template)
 end
 
 function DungeonRoomState:mousepressed()
@@ -54,14 +73,15 @@ function DungeonRoomState:keypressed(key)
     end
 end
 
-function DungeonRoomState:load_entities(template)
-    local Block = require 'entities.block'
-    local Paddle = require 'entities.paddle'
-    local Ball = require 'entities.ball'
+function DungeonRoomState:add_entity(entity)
+    self.entities[entity] = true
+    entity:add_to_world(self.world)
+end
 
-
-    local kill_block = function(block, ball) block.is_dead = true end
-    local kill_ball = function(block, ball) ball.is_dead = true end
+function DungeonRoomState:load_template(template)
+    -- local Block = require 'entities.block'
+    -- local Paddle = require 'entities.paddle'
+    -- local Ball = require 'entities.ball'
 
     local ok, file, room
     ok, file = pcall(love.filesystem.load, template)
@@ -111,10 +131,25 @@ function DungeonRoomState:load_entities(template)
     end
 
 
+    block_entity_classes = {}
+    for entity_name,entity_class in pairs(self.ENTITIES) do
+        if entity_class.is_block then
+            table.insert(block_entity_classes, entity_class)
+        end
+    end
+
+
+    for block_id,v in pairs(block_ids) do
+        block_ids[block_id] = block_entity_classes[love.math.random(#block_entity_classes)]
+    end
+
+    
+
+
     local entities = {}
-    for i, block in ipairs(block_positions) do
-        local block = Block(tile_width * block.x, tile_height * block.y , tile_width, tile_height, kill_block)
-        entities[block] = true
+    for i, block_data in ipairs(block_positions) do
+        local block = block_ids[block_data.id](tile_width * block_data.x, tile_height * block_data.y , tile_width, tile_height)
+        self:add_entity(block)
     end
 
     -- load initial paddle into room
@@ -124,38 +159,37 @@ function DungeonRoomState:load_entities(template)
     player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
     player_start_y = love.graphics.getHeight( ) - tile_height
 
-    local paddle = Paddle(player_start_x, player_start_y, player_width, player_height)
-    entities[paddle] = true
+    local paddle = self.ENTITIES['paddle'](player_start_x, player_start_y, player_width, player_height)
+    self:add_entity(paddle)
 
 
     -- load barriers around the game window
     -- left barrier
     local blk
-    blk = Block(-25, 0, 25, love.graphics.getHeight( ))
-    entities[blk] = true
+    blk = self.ENTITIES['ImmortalBlock'](-25, 0, 25, love.graphics.getHeight( ))
+    self:add_entity(blk)
 
     -- right barrier
-    blk = Block(love.graphics.getWidth( ), 0, 25, love.graphics.getHeight( ))
-    entities[blk] = true
+    blk = self.ENTITIES['ImmortalBlock'](love.graphics.getWidth( ), 0, 25, love.graphics.getHeight( ))
+    self:add_entity(blk)
 
     -- top barrier
-    blk = Block(-25, -25, love.graphics.getWidth( )+25, 25)
-    entities[blk] = true
+    blk = self.ENTITIES['ImmortalBlock'](-25, -25, love.graphics.getWidth( )+25, 25)
+    self:add_entity(blk)
 
-    blk = Block(-25, love.graphics.getHeight( ), love.graphics.getWidth( )+25, 25, kill_ball)
-    entities[blk] = true
+    blk = self.ENTITIES['LoseBlock'](-25, love.graphics.getHeight( ), love.graphics.getWidth( )+25, 25)
+    self:add_entity(blk)
 
 
     -- load initial ball into room
     -- assume ball always starts above the paddle
-    ball_width = math.floor(tile_width / 2)
-    ball_height = math.floor(tile_height / 2)
-    ball_start_x = player_start_x + math.floor(player_width / 2) - math.floor(ball_width / 2)
-    ball_start_y = player_start_y + ball_height
-    ball_start_speed = 100
-    ball_start_vx = ball_start_speed * (2 * math.random() - 1)
-    ball_start_vy = ball_start_speed * math.floor(math.random() + 0.5)
-    local ball = Ball(
+    local ball_width = math.floor(tile_width / 2)
+    local ball_height = math.floor(tile_height / 2)
+    local ball_start_x = player_start_x + math.floor(player_width / 2) - math.floor(ball_width / 2)
+    local ball_start_y = player_start_y - ball_height
+    
+
+    local ball = self.ENTITIES['ball'](
         ball_start_x,
         ball_start_y,
         ball_width,
@@ -163,7 +197,7 @@ function DungeonRoomState:load_entities(template)
         ball_start_vx,
         ball_start_vy
     )
-    entities[ball] = true
+    self:add_entity(ball)
 
 
     return entities

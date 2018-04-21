@@ -1,4 +1,5 @@
 local Paddle = class({})
+Paddle.name = "paddle"
 
 function Paddle:init(x, y, w, h)
     self.x = x
@@ -35,6 +36,9 @@ end
 
 function Paddle:update(world, dt)
     return false
+end
+
+function Paddle:on_ball_collision(ball)
 end
 
 return Paddle

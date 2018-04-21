@@ -1,12 +1,19 @@
 local Ball = class({})
+Ball.name = "ball"
 
 function Ball:init(x, y, w, h, vx, vy)
     self.x = x
     self.y = y
     self.w = w
     self.h = h
-    self.vx = vx
-    self.vy = vy
+    
+
+    local ball_start_speed = 250
+    local ball_start_vx = ball_start_speed * (2 * math.random() - 1)
+    local ball_start_vy = ball_start_speed * math.min(math.random(), 0.25)
+
+    self.vx = vx or ball_start_vx
+    self.vy = vy or ball_start_vy
 
     self.is_dead = false
     self.is_ball = true
@@ -59,6 +66,7 @@ function Ball:block_collision(col)
 
     local other = col.other
     other:on_ball_collision(self)
+
 end
 
 function Ball:paddle_collision(col)
