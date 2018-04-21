@@ -10,29 +10,8 @@ function DungeonRoomState:enter(previous_state, template)
 
     self.world = bump.newWorld()
     self.entities = {}
-   
-
-    self.ENTITIES = {}
-    for i, file_name in ipairs(love.filesystem.getDirectoryItems('entities')) do
-        file_name = 'entities/' .. file_name
-        local ok, file, room
-        ok, file = pcall(love.filesystem.load, file_name)
-        
-        if not ok then
-            error('Entity file for dungeon does not exist: ' .. file_name)
-        end
-
-        
-        ok, entity_class = pcall(file)
-        if not ok then
-            error('Entity file failed to compile: ' .. file_name .. '\n' .. entity_class)
-        end
-
-        self.ENTITIES[entity_class.name] = entity_class
-    end
-
-
-     self:load_template(self.template)
+    self:load_entity_classes()
+    self:load_template(self.template)
 end
 
 function DungeonRoomState:mousepressed()
@@ -78,16 +57,34 @@ function DungeonRoomState:add_entity(entity)
     entity:add_to_world(self.world)
 end
 
+function DungeonRoomState:load_entity_classes()
+    self.ENTITIES = {}
+    for i, file_name in ipairs(love.filesystem.getDirectoryItems('entities')) do
+        file_name = 'entities/' .. file_name
+        local ok, file, room
+        ok, file = pcall(love.filesystem.load, file_name)
+        
+        if not ok then
+            error('Problem occurred loading entity file: ' .. file_name .. '\n' .. file)
+        end
+
+        
+        ok, entity_class = pcall(file)
+        if not ok then
+            error('Entity file failed to compile: ' .. file_name .. '\n' .. entity_class)
+        end
+
+        self.ENTITIES[entity_class.name] = entity_class
+    end
+end
+
 function DungeonRoomState:load_template(template)
-    -- local Block = require 'entities.block'
-    -- local Paddle = require 'entities.paddle'
-    -- local Ball = require 'entities.ball'
 
     local ok, file, room
     ok, file = pcall(love.filesystem.load, template)
     
     if not ok then
-        error('Template for dungeon does not exist: ')
+        error('Problem occurred loading template: ' .. template)
     end
 
     
@@ -198,43 +195,6 @@ function DungeonRoomState:load_template(template)
         ball_start_vy
     )
     self:add_entity(ball)
-
-
-    return entities
-end
-
-function DungeonRoomState:test_load_entities(template)
-
-    -- body
-
-    local entities = {}
-
-    local Block = require 'entities.block'
-    local block = Block(-25, 0, 25, love.graphics.getHeight( ))
-    local block1 = Block(love.graphics.getWidth( ), 0, 25, love.graphics.getHeight( ))
-    local block2 = Block(-25, -25, love.graphics.getWidth( )+25, 25)
-    local block3 = Block(-25, love.graphics.getHeight( ), love.graphics.getWidth( )+25, 25, function(block, ball)
-        ball.is_dead = true
-    end)
-    entities[block] = true
-    entities[block1] = true
-    entities[block2] = true
-    entities[block3] = true
-
-
-    local Paddle = require 'entities.paddle'
-    local paddle = Paddle(30, love.graphics.getHeight( )-30, 100, 25)
-    entities[paddle] = true
-
-    local Ball = require 'entities.ball'
-    local ball = Ball(300, 300, 25, 25, 100, -100)
-    entities[ball] = true
-
-
-    local enemy = Block(0, 0, love.graphics.getWidth( ), 25, function(block, ball)
-        block.is_dead = true
-    end)
-    entities[enemy] = true
 
 
     return entities
