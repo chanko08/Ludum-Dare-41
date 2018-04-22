@@ -16,10 +16,6 @@ function PowerUp:init(x, y, w, h, powerup, state)
     self.is_powerup = true
 end
 
-function PowerUp:add_to_world(world)
-    world:add(self, self.x, self.y, self.w, self.h)
-end
-
 function PowerUp:draw()
     love.graphics.draw(self.powerup.image, self.powerup.quad, self.x, self.y)
 end
@@ -37,8 +33,6 @@ function PowerUp:update(world, dt)
     self.y = actualY
     for i=1,len do
         if cols[i].other.is_paddle then
-            print('action!')
-            print(inspect(self.state))
             self.powerup.action(self, cols[i].other, self.state)
             self.is_dead = true
         end

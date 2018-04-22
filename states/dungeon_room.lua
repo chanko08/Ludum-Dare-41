@@ -38,11 +38,11 @@ function DungeonRoomState:update(dt)
             self.world:remove(entity)
 
             if entity.is_ball then
-                print("you lost!")
+                -- print("you lost!")
             elseif entity.is_block and entity.power_up then
-                print(inspect(entity))
-                print(inspect(entity.power_up))
+                print('here?')
                 self.entities[entity.power_up] = true
+                print(inspect(entity.power_up))
                 self.world:add(entity.power_up, entity.power_up.x, entity.power_up.y, entity.power_up.w, entity.power_up.h)
             end
         end
@@ -51,18 +51,10 @@ end
 
 function DungeonRoomState:draw()
     for entity, alive in pairs(self.entities) do
-        if entity.tile then
-            love.graphics.draw(entity.tile.image, entity.tile.quad, entity.x, entity.y)
-        elseif entity.draw then
+        if entity.draw then
             entity:draw()
         end
     end
-
-    --[[
-    for entity,i in pairs(self.entities) do
-        entity:draw(dt)
-    end
-    ]]
 end
 
 function DungeonRoomState:keypressed(key)
@@ -73,8 +65,14 @@ end
 
 function DungeonRoomState:add_entity(entity)
     self.entities[entity] = true
-    entity:add_to_world(self.world)
+    self.world:add(entity, entity.x, entity.y, entity.w, entity.h)
 end
+
+function DungeonRoomState:remove_entity(entity)
+    self.entities[entity] = nil
+    self.world:remove(entity)
+end
+
 
 function DungeonRoomState:load_folder(folder)
     folder_items = {}
@@ -142,7 +140,6 @@ function DungeonRoomState:load_tileset(tileset)
 
     local tiles = {}
     for i, tile in pairs(ts) do
-        print(inspect(tile))
         tiles[tile.global_id] = tile
     end
 
@@ -239,14 +236,15 @@ function DungeonRoomState:load_template(template)
                 error('WARNING: Block id does not match any block image ids')
             end
             if not behavior then
-                print('WARNING: Block id does not match any block behavior ids')
+                --print('WARNING: Block id does not match any block behavior ids')
             end
             if not power_up then
-                print('WARNING: Block id does not match any power up ids')
+                --print('WARNING: Block id does not match any power up ids')
             end
 
             local behavior_action
             if behavior and behavior.properties.name then
+                print(behavior.properties.name)
                 behavior_action = self.BLOCK_BEHAVIORS[behavior.properties.name]
             else
                 -- if no behavior given, default to a do-nothing behavior
@@ -262,19 +260,17 @@ function DungeonRoomState:load_template(template)
 
 
 
-
-            table.insert(block_objects, {
-                index = i,
-                block_id = block_id,
-                x = x,
-                y = y,
-                w = tile_width,
-                h = tile_height,
-                tile = tile,
-                behavior = behavior_action,
-                power_up = power_up_obj,
-                is_block = true
-            })
+            
+            table.insert(block_objects, self.ENTITIES['block.lua'](
+                x,
+                y,
+                tile_width,
+                tile_height,
+                tile,
+                behavior_action,
+                power_up_obj,
+                self
+            ))
         end
     end
 
@@ -298,7 +294,17 @@ function DungeonRoomState:load_template(template)
     -- load barriers around the game window
     -- left barrier
     local blk
-    blk = {
+    blk = self.ENTITIES['block.lua'](
+        -25,
+        0,
+        25,
+        love.graphics.getHeight(),
+        nil,
+        self.BLOCK_BEHAVIORS['immortal.lua'],
+        nil,
+        self
+    )
+    --[[blk = {
         index = nil,
         block_id = block_id,
         x = -25,
@@ -309,12 +315,22 @@ function DungeonRoomState:load_template(template)
         behavior = self.BLOCK_BEHAVIORS['immortal.lua'],
         power_up = nil,
         is_block = true
-    }
+    }]]
     self.entities[blk] = true
     self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
     -- right barrier
-    blk = {
+    blk = self.ENTITIES['block.lua'](
+        love.graphics.getWidth(),
+        0,
+        25,
+        love.graphics.getHeight(),
+        nil,
+        self.BLOCK_BEHAVIORS['immortal.lua'],
+        nil,
+        self
+    )
+    --[[blk = {
         index = nil,
         block_id = block_id,
         x = love.graphics.getWidth( ),
@@ -325,12 +341,22 @@ function DungeonRoomState:load_template(template)
         behavior = self.BLOCK_BEHAVIORS['immortal.lua'],
         power_up = nil,
         is_block = true
-    }
+    }]]
     self.entities[blk] = true
     self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
     -- top barrier
-    blk = {
+    blk = self.ENTITIES['block.lua'](
+        -25,
+        -25,
+        love.graphics.getWidth() + 25,
+        25,
+        nil,
+        self.BLOCK_BEHAVIORS['immortal.lua'],
+        nil,
+        self
+    )
+    --[[blk = {
         index = nil,
         block_id = block_id,
         x = -25,
@@ -341,11 +367,21 @@ function DungeonRoomState:load_template(template)
         behavior = self.BLOCK_BEHAVIORS['immortal.lua'],
         power_up = nil,
         is_block = true
-    }
+    }]]
     self.entities[blk] = true
     self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 
-    blk = {
+    blk = self.ENTITIES['block.lua'](
+        -25,
+        love.graphics.getHeight(),
+        love.graphics.getWidth(),
+        25,
+        nil,
+        self.BLOCK_BEHAVIORS['kill_ball.lua'],
+        nil,
+        self
+    )
+    --[[blk = {
         index = nil,
         block_id = block_id,
         x = -25,
@@ -356,7 +392,7 @@ function DungeonRoomState:load_template(template)
         behavior = self.BLOCK_BEHAVIORS['kill_ball.lua'],
         power_up = nil,
         is_block = true
-    }
+    }]]
     self.entities[blk] = true
     self.world:add(blk, blk.x, blk.y, blk.w, blk.h)
 

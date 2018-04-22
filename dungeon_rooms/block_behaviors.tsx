@@ -6,6 +6,11 @@
    <property name="name" value="kill_block.lua"/>
   </properties>
  </tile>
+ <tile id="7">
+  <properties>
+   <property name="name" value="block_armor.lua"/>
+  </properties>
+ </tile>
  <tile id="10">
   <properties>
    <property name="name" value="immortal_block.lua"/>

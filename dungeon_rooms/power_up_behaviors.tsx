@@ -3,7 +3,7 @@
  <image source="power_up_behaviors.png" trans="eeeeec" width="720" height="480"/>
  <tile id="1">
   <properties>
-   <property name="name" value="paddle_size_up.lua"/>
+   <property name="name" value="multiball.lua"/>
   </properties>
  </tile>
  <tile id="3">

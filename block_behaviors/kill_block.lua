@@ -1,3 +1,3 @@
 return function(block, ball)
-    block.is_dead = true
+    block.state:remove_entity(block)
 end

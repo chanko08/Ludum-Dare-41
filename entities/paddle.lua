@@ -18,6 +18,8 @@ function Paddle:move(world, x, y, dx, dy)
     local actualX, actualY, cols, len = world:move(self, self.x + dx, self.y, function(item, other)
         if other.is_powerup then
             return 'cross'
+        elseif other.is_paddle then
+            return 'cross'
         end
         return 'touch'
     end)
