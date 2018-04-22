@@ -13,8 +13,16 @@ return function(powerup, paddle, state)
         end
 
         if entity.is_ball then
+            local vel = vector(entity.vx, entity.vy)
+            local ball_start_vx = vel:len() * (2 * math.random() - 1)
+            local ball_start_vy = vel:len() * math.min(math.random(), 0.25)
 
-            local copy_ball = state.ENTITIES['ball.lua'](entity.x, entity.y, entity.w, entity.h)
+            local copy_ball = state.ENTITIES['ball.lua'](
+                entity.x,
+                entity.y,
+                entity.w,
+                entity.h
+            )
             state.entities[copy_ball] = true
             state.world:add(copy_ball, copy_ball.x, copy_ball.y, copy_ball.w, copy_ball.h)
 
