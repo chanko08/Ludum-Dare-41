@@ -175,8 +175,9 @@ function DungeonRoomState:initialize_player(tile_width, tile_height)
         local player_height = 3 * math.floor(tile_height / 4)
         local player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
         local player_start_y = love.graphics.getHeight( ) - tile_height
+        local player_sound = love.audio.newSource('sounds/paddle_hit.wav', 'static')
 
-        local paddle = self.ENTITIES['paddle.lua'](player_start_x, player_start_y, player_width, player_height)
+        local paddle = self.ENTITIES['paddle.lua'](player_start_x, player_start_y, player_width, player_height, player_sound)
         self:add_entity(paddle)
 
 
@@ -306,7 +307,6 @@ function DungeonRoomState:load_dungeon_room(dungeon_room, previous_entities)
             local sound
             if behavior and behavior.properties and behavior.properties.sound then
                 sound = behavior.properties.sound
-                print(inspect(behavior.properties))
                 if not all_sounds[sound] then
                     all_sounds[sound] = love.audio.newSource(sound, 'static')
                 end
@@ -318,7 +318,16 @@ function DungeonRoomState:load_dungeon_room(dungeon_room, previous_entities)
             if power_up and power_up.properties and power_up.properties.name then
                 power_up_action = self.POWER_UP_BEHAVIORS[power_up.properties.name]
                 power_up.action = power_up_action
-                power_up_obj = self.ENTITIES['powerup.lua'](x, y, tile_width, tile_height, power_up, self)
+                local sound
+                if power_up.properties.sound then
+                    sound = power_up.properties.sound
+                    if not all_sounds[sound] then
+                        all_sounds[sound] = love.audio.newSource(sound, 'static')
+
+                    end
+                    sound = all_sounds[sound]
+                end
+                power_up_obj = self.ENTITIES['powerup.lua'](x, y, tile_width, tile_height, power_up, sound, self)
                 --print(inspect(power_up_obj))
             end
 

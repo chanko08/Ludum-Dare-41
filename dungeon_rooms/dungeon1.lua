@@ -72,7 +72,8 @@ return {
         {
           id = 7,
           properties = {
-            ["name"] = "block_armor.lua"
+            ["name"] = "block_armor.lua",
+            ["sound"] = "sounds/block_armor_hit.wav"
           }
         },
         {
@@ -111,13 +112,15 @@ return {
         {
           id = 1,
           properties = {
-            ["name"] = "multiball.lua"
+            ["name"] = "multiball.lua",
+            ["sound"] = "sounds/multiball.wav"
           }
         },
         {
           id = 3,
           properties = {
-            ["name"] = "nothing.lua"
+            ["name"] = "ball_speed_up.lua",
+            ["sound"] = "sounds/ball_speed_up.wav"
           }
         }
       }
@@ -131,7 +134,7 @@ return {
       y = 0,
       width = 30,
       height = 45,
-      visible = true,
+      visible = false,
       opacity = 1,
       offsetx = 0,
       offsety = 0,

@@ -78,7 +78,6 @@ function Ball:block_collision(col)
     end
 
     if other.sound then
-        print("PLAYING SOUND")
         love.audio.stop(other.sound)
         love.audio.play(other.sound)
     end
@@ -109,6 +108,9 @@ function Ball:paddle_collision(col)
     new_ball_direction = new_ball_direction * old_ball_direction:len()
     self.vx = new_ball_direction.x
     self.vy = new_ball_direction.y
+
+    love.audio.stop(paddle.sound)
+    love.audio.play(paddle.sound)
 end
 
 return Ball

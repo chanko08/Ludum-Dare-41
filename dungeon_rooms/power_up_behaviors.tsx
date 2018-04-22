@@ -4,11 +4,13 @@
  <tile id="1">
   <properties>
    <property name="name" value="multiball.lua"/>
+   <property name="sound" value="sounds/multiball.wav"/>
   </properties>
  </tile>
  <tile id="3">
   <properties>
-   <property name="name" value="nothing.lua"/>
+   <property name="name" value="ball_speed_up.lua"/>
+   <property name="sound" value="sounds/ball_speed_up.wav"/>
   </properties>
  </tile>
 </tileset>

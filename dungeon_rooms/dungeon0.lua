@@ -72,7 +72,8 @@ return {
         {
           id = 7,
           properties = {
-            ["name"] = "block_armor.lua"
+            ["name"] = "block_armor.lua",
+            ["sound"] = "sounds/block_armor_hit.wav"
           }
         },
         {
@@ -111,13 +112,15 @@ return {
         {
           id = 1,
           properties = {
-            ["name"] = "multiball.lua"
+            ["name"] = "multiball.lua",
+            ["sound"] = "sounds/multiball.wav"
           }
         },
         {
           id = 3,
           properties = {
-            ["name"] = "nothing.lua"
+            ["name"] = "ball_speed_up.lua",
+            ["sound"] = "sounds/ball_speed_up.wav"
           }
         }
       }

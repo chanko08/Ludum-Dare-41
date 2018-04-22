@@ -10,6 +10,7 @@
  <tile id="7">
   <properties>
    <property name="name" value="block_armor.lua"/>
+   <property name="sound" value="sounds/block_armor_hit.wav"/>
   </properties>
  </tile>
  <tile id="10">

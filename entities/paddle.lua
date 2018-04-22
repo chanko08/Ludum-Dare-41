@@ -1,11 +1,12 @@
 local Paddle = class({})
 Paddle.name = "paddle"
 
-function Paddle:init(x, y, w, h)
+function Paddle:init(x, y, w, h, sound)
     self.x = x
     self.y = y
     self.w = w
     self.h = h
+    self.sound = sound
 
     self.is_paddle = true
 end

@@ -35,20 +35,7 @@ return {
       properties = {},
       terrains = {},
       tilecount = 1350,
-      tiles = {
-        {
-          id = 2,
-          properties = {
-            ["name"] = "kill_block.lua"
-          }
-        },
-        {
-          id = 3,
-          properties = {
-            ["name"] = "ball_speed_up.lua"
-          }
-        }
-      }
+      tiles = {}
     },
     {
       name = "block_behaviors",
@@ -76,21 +63,17 @@ return {
       tilecount = 1350,
       tiles = {
         {
-          id = 0,
-          properties = {
-            ["name"] = ""
-          }
-        },
-        {
           id = 2,
           properties = {
-            ["name"] = "kill_block.lua"
+            ["name"] = "kill_block.lua",
+            ["sound"] = "sounds/kill_block_hit.wav"
           }
         },
         {
-          id = 3,
+          id = 7,
           properties = {
-            ["name"] = "block_armor.lua"
+            ["name"] = "block_armor.lua",
+            ["sound"] = "sounds/block_armor_hit.wav"
           }
         },
         {
@@ -127,66 +110,17 @@ return {
       tilecount = 1350,
       tiles = {
         {
-          id = 0,
-          properties = {
-            ["name"] = "paddle_size_up.lua"
-          }
-        },
-        {
           id = 1,
           properties = {
-            ["name"] = "multiball.lua"
+            ["name"] = "multiball.lua",
+            ["sound"] = "sounds/multiball.wav"
           }
         },
         {
           id = 3,
           properties = {
-            ["name"] = "ball_speed_up.lua"
-          }
-        },
-        {
-          id = 9,
-          properties = {
-            ["name"] = "paddle_size_down.lua"
-          }
-        }
-      }
-    },
-    {
-      name = "template",
-      firstgid = 4051,
-      filename = "tile_template.tsx",
-      tilewidth = 16,
-      tileheight = 16,
-      spacing = 0,
-      margin = 0,
-      image = "tile_template.png",
-      imagewidth = 720,
-      imageheight = 480,
-      transparentcolor = "#eeeeec",
-      tileoffset = {
-        x = 0,
-        y = 0
-      },
-      grid = {
-        orientation = "orthogonal",
-        width = 16,
-        height = 16
-      },
-      properties = {},
-      terrains = {},
-      tilecount = 1350,
-      tiles = {
-        {
-          id = 3,
-          properties = {
-            ["name"] = "nothing.lua"
-          }
-        },
-        {
-          id = 10,
-          properties = {
-            ["name"] = "immortal.lua"
+            ["name"] = "ball_speed_up.lua",
+            ["sound"] = "sounds/ball_speed_up.wav"
           }
         }
       }
