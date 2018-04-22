@@ -16,12 +16,14 @@ function DungeonLevelMapState:enter(previous_state, dungeon_level_map, continuin
 
     self.dungeon_level_map = dungeon_level_map
     self.game_started = false
+    self.on_final_level = false
 
     self.world = bump.newWorld()
     self.entities = {}
     self.ENTITIES = load_folder('entities')
-    self:load_dungeon_level_map(self.dungeon_level_map)
-    self.on_final_level = false
+    local start_dungeon = self:load_dungeon_level_map(self.dungeon_level_map)
+    gs.switch(DungeonRoomState, start_dungeon)
+    
 end
 
 function DungeonLevelMapState:draw()
@@ -59,6 +61,7 @@ function DungeonLevelMapState:remove_entity(entity)
 end
 
 function DungeonLevelMapState:load_dungeon_level_map(dungeon_level_map)
+    local start_dungeon
     map = load_map(dungeon_level_map)
 
     --Merge the tile layers and add them to the world/state. 
@@ -128,6 +131,9 @@ function DungeonLevelMapState:load_dungeon_level_map(dungeon_level_map)
             unexplored_tile = unexplored_tile
         }
 
+        if blk.behavior == 'start' then
+            start_dungeon = blk.dungeon
+        end
 
         table.insert(blks, blk)
     end
@@ -192,6 +198,9 @@ function DungeonLevelMapState:load_dungeon_level_map(dungeon_level_map)
         self:add_entity(blk)
     end
     
+
+
+    return start_dungeon
 end
 
 function DungeonLevelMapState:mousepressed(x, y, button)
