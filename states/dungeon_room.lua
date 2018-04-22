@@ -257,7 +257,7 @@ function DungeonRoomState:load_template(template)
             if power_up and power_up.properties.name then
                 power_up_action = self.POWER_UP_BEHAVIORS[power_up.properties.name]
                 power_up.action = power_up_action
-                power_up_obj = self.ENTITIES['powerup.lua'](x, y, tile_width, tile_height, power_up, state)
+                power_up_obj = self.ENTITIES['powerup.lua'](x, y, tile_width, tile_height, power_up, self)
             end
 
 

@@ -37,7 +37,10 @@ function PowerUp:update(world, dt)
     self.y = actualY
     for i=1,len do
         if cols[i].other.is_paddle then
-            self.powerup.action(self, cols[i].other, state)
+            print('action!')
+            print(inspect(self.state))
+            self.powerup.action(self, cols[i].other, self.state)
+            self.is_dead = true
         end
     end
 
