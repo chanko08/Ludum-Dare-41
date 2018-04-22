@@ -9,6 +9,7 @@ function DungeonLevelMapState:enter(previous_state, dungeon_level_map, continuin
     end
 
     if continuing then
+        self.old_entities = previous_state.entities
         return
     end
 
@@ -218,10 +219,9 @@ function DungeonLevelMapState:mousepressed(x, y, button)
     if blk.tile.properties.name == 'explorable' then
         blk.tile = blk.tiles.explored
         if blk.behavior == 'end' then
-            print "flipping final level bit"
             self.on_final_level = true
         end
-        gs.switch(DungeonRoomState, blk.dungeon)
+        gs.switch(DungeonRoomState, blk.dungeon, self.old_entities)
     end
 end
 

@@ -1,6 +1,6 @@
 local DungeonRoomState = class({})
 
-function DungeonRoomState:enter(previous_state, dungeon_room)
+function DungeonRoomState:enter(previous_state, dungeon_room, previous_entities)
     love.mouse.setRelativeMode(true)
 
     self.dungeon_level = previous_state
@@ -12,7 +12,7 @@ function DungeonRoomState:enter(previous_state, dungeon_room)
     self.ENTITIES = self:load_folder('entities')
     self.BLOCK_BEHAVIORS = self:load_folder('block_behaviors')
     self.POWER_UP_BEHAVIORS = self:load_folder('power_up_behaviors')
-    self:load_dungeon_room(self.dungeon_room)
+    self:load_dungeon_room(self.dungeon_room, previous_entities)
 end
 
 function DungeonRoomState:mousepressed()
@@ -156,8 +156,38 @@ function DungeonRoomState:load_tileset(tileset)
     return tiles
 end
 
+function DungeonRoomState:initialize_player(tile_width, tile_height)
+        -- load initial paddle into room
+        -- assume paddle always starts in the middle of the bottom row of the template
+        local player_width = tile_width * 10
+        local player_height = 3 * math.floor(tile_height / 4)
+        local player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
+        local player_start_y = love.graphics.getHeight( ) - tile_height
 
-function DungeonRoomState:load_dungeon_room(dungeon_room)
+        local paddle = self.ENTITIES['paddle.lua'](player_start_x, player_start_y, player_width, player_height)
+        self:add_entity(paddle)
+
+
+        -- load initial ball into room
+        -- assume ball always starts above the paddle
+        local ball_width = math.floor(tile_width / 2)
+        local ball_height = math.floor(tile_height / 2)
+        local ball_start_x = player_start_x + math.floor(player_width / 2) - math.floor(ball_width / 2)
+        local ball_start_y = player_start_y - ball_height
+        
+
+        local ball = self.ENTITIES['ball.lua'](
+            ball_start_x,
+            ball_start_y,
+            ball_width,
+            ball_height,
+            ball_start_vx,
+            ball_start_vy
+        )
+        self:add_entity(ball)
+end
+
+function DungeonRoomState:load_dungeon_room(dungeon_room, previous_entities)
 
     local ok, file, room
     ok, file = pcall(love.filesystem.load, dungeon_room)
@@ -288,17 +318,6 @@ function DungeonRoomState:load_dungeon_room(dungeon_room)
         self:add_entity(blk)
     end
 
-    -- load initial paddle into room
-    -- assume paddle always starts in the middle of the bottom row of the template
-    player_width = tile_width * 10
-    player_height = 3 * math.floor(tile_height / 4)
-    player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
-    player_start_y = love.graphics.getHeight( ) - tile_height
-
-    local paddle = self.ENTITIES['paddle.lua'](player_start_x, player_start_y, player_width, player_height)
-    self:add_entity(paddle)
-
-
     -- load barriers around the game window
     -- left barrier
     local blk
@@ -352,24 +371,31 @@ function DungeonRoomState:load_dungeon_room(dungeon_room)
     )
     self:add_entity(blk)
 
+    if not previous_entities then
+        self:initialize_player(tile_width, tile_height)
+    else
+        local player_width = tile_width * 10
+        local player_height = 3 * math.floor(tile_height / 4)
+        local player_start_x = love.graphics.getWidth() / 2 - math.floor(player_width / 2)
+        local player_start_y = love.graphics.getHeight( ) - tile_height
+        local ball_width = math.floor(tile_width / 2)
+        local ball_height = math.floor(tile_height / 2)
+        local ball_start_x = player_start_x + math.floor(player_width / 2) - math.floor(ball_width / 2)
+        local ball_start_y = player_start_y - ball_height
 
-    -- load initial ball into room
-    -- assume ball always starts above the paddle
-    local ball_width = math.floor(tile_width / 2)
-    local ball_height = math.floor(tile_height / 2)
-    local ball_start_x = player_start_x + math.floor(player_width / 2) - math.floor(ball_width / 2)
-    local ball_start_y = player_start_y - ball_height
-    
+        for old_ent, alive in pairs(previous_entities) do
+            if old_ent.is_paddle then        
+                old_ent.x = player_start_x
+                old_ent.y = player_start_y
+                self:add_entity(old_ent)
+            elseif old_ent.is_ball then
+                old_ent.x = ball_start_x
+                old_ent.y = ball_start_y
+                self:add_entity(old_ent)
+            end
 
-    local ball = self.ENTITIES['ball.lua'](
-        ball_start_x,
-        ball_start_y,
-        ball_width,
-        ball_height,
-        ball_start_vx,
-        ball_start_vy
-    )
-    self:add_entity(ball)
+        end
+    end
 
     return entities
 end
