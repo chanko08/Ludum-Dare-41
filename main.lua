@@ -90,5 +90,5 @@ local DungeonRoomState = require 'states.dungeon_room'
 
 function love.load()
     gs.registerEvents()
-    gs.switch(DungeonRoomState, 'dungeon_rooms/dungeon6.lua')
+    gs.switch(DungeonRoomState, 'dungeon_rooms/dungeon0.lua')
 end
