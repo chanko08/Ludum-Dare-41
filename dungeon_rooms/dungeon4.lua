@@ -63,10 +63,24 @@ return {
       tilecount = 1350,
       tiles = {
         {
+          id = 0,
+          properties = {
+            ["name"] = "immortal.lua",
+            ["sound"] = "immortal_hit.wav"
+          }
+        },
+        {
           id = 2,
           properties = {
             ["name"] = "kill_block.lua",
             ["sound"] = "sounds/kill_block_hit.wav"
+          }
+        },
+        {
+          id = 3,
+          properties = {
+            ["name"] = "block_armor.lua",
+            ["sound"] = "sounds/block_armor_hit.wav"
           }
         },
         {
@@ -195,7 +209,7 @@ return {
       y = 0,
       width = 30,
       height = 45,
-      visible = true,
+      visible = false,
       opacity = 1,
       offsetx = 0,
       offsety = 0,
@@ -256,7 +270,7 @@ return {
       y = 0,
       width = 30,
       height = 45,
-      visible = true,
+      visible = false,
       opacity = 0.46,
       offsetx = 0,
       offsety = 0,
