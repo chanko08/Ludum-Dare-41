@@ -16,15 +16,17 @@ end
 
 function Paddle:move(world, x, y, dx, dy)
     local actualX, actualY, cols, len = world:move(self, self.x + dx, self.y, function(item, other)
-        if other.is_powerup then
-            return 'cross'
-        elseif other.is_paddle then
-            return 'cross'
+        if other.is_block then
+            return 'touch'
         end
-        return 'touch'
+        return 'cross'
     end)
     self.x = actualX
     self.y = actualY
+
+    if self.x < 0 or self.x > love.graphics.getWidth() then
+        error("WTF!!!!")
+    end
 end
 
 function Paddle:draw()

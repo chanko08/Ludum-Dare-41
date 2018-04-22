@@ -13,6 +13,7 @@ function DungeonRoomState:enter(previous_state, dungeon_room, previous_entities)
     self.BLOCK_BEHAVIORS = self:load_folder('block_behaviors')
     self.POWER_UP_BEHAVIORS = self:load_folder('power_up_behaviors')
     self:load_dungeon_room(self.dungeon_room, previous_entities)
+    print('loaded room!')
 end
 
 function DungeonRoomState:mousepressed()
@@ -37,7 +38,7 @@ function DungeonRoomState:update(dt)
             self.world:remove(entity)
 
             if entity.is_ball then
-                -- print("you lost!")
+                --print("you lost!")
             elseif entity.is_block and entity.power_up then
                 print("block destroyed and deploying power_up")
                 self.entities[entity.power_up] = true
@@ -56,6 +57,17 @@ function DungeonRoomState:update(dt)
 
     if win then
         gs.switch(self.dungeon_level, nil, true)
+    end
+
+    local lose = true
+    for entity, i in pairs(self.entities) do
+        if entity.is_ball then
+            lose = false
+        end
+    end
+
+    if lose then
+        gs.switch(GameLoseState)
     end
 end
 
@@ -261,6 +273,7 @@ function DungeonRoomState:load_dungeon_room(dungeon_room, previous_entities)
     local tile_height = room_template.tileheight
     local tile_width = room_template.tilewidth
 
+    local all_sounds = {}
     local block_ids = {}
     local block_positions = {}
     local block_objects = {}
@@ -290,6 +303,17 @@ function DungeonRoomState:load_dungeon_room(dungeon_room, previous_entities)
                 behavior_action = self.BLOCK_BEHAVIORS['immortal.lua']
             end
 
+            local sound
+            if behavior and behavior.properties and behavior.properties.sound then
+                sound = behavior.properties.sound
+                print(inspect(behavior.properties))
+                if not all_sounds[sound] then
+                    all_sounds[sound] = love.audio.newSource(sound, 'static')
+                end
+                
+                sound = all_sounds[sound]
+            end
+
             local power_up_obj
             if power_up and power_up.properties and power_up.properties.name then
                 power_up_action = self.POWER_UP_BEHAVIORS[power_up.properties.name]
@@ -309,6 +333,7 @@ function DungeonRoomState:load_dungeon_room(dungeon_room, previous_entities)
                 tile,
                 behavior_action,
                 power_up_obj,
+                sound,
                 self
             ))
         end

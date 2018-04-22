@@ -4,6 +4,7 @@
  <tile id="2">
   <properties>
    <property name="name" value="kill_block.lua"/>
+   <property name="sound" value="sounds/kill_block_hit.wav"/>
   </properties>
  </tile>
  <tile id="7">

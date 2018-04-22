@@ -194,6 +194,9 @@ end
 DungeonRoomState = require 'states.dungeon_room'
 DungeonLevelState = require 'states.dungeon_level_map'
 GameStartState = require 'states.game_start'
+GameWinState = require 'states.game_win'
+GameLoseState = require 'states.game_lose'
+
 
 function love.load()
     gs.registerEvents()

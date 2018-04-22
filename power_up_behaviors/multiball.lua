@@ -7,8 +7,9 @@ return function(powerup, paddle, state)
 		end
 	end
 
+    local new_balls =3
     for entity, exists in pairs(state.entities) do
-        if ball_count >= max_balls then
+        if ball_count >= max_balls or new_balls <=0 then
             break
         end
 
@@ -27,6 +28,7 @@ return function(powerup, paddle, state)
             state.world:add(copy_ball, copy_ball.x, copy_ball.y, copy_ball.w, copy_ball.h)
 
             ball_count = ball_count + 1
+            new_balls = new_balls - 1
         end
     end
 

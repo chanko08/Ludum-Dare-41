@@ -77,6 +77,12 @@ function Ball:block_collision(col)
         other.behavior(other, self)
     end
 
+    if other.sound then
+        print("PLAYING SOUND")
+        love.audio.stop(other.sound)
+        love.audio.play(other.sound)
+    end
+
 end
 
 function Ball:paddle_collision(col)

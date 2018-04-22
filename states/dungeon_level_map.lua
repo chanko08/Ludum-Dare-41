@@ -4,7 +4,7 @@ function DungeonLevelMapState:enter(previous_state, dungeon_level_map, continuin
     love.mouse.setRelativeMode(false)
     
     if continuing and self.on_final_level then
-        print "YOU WIN THE WHOLE GAME!"
+        gs.switch(GameWinState)
         return
     end
 

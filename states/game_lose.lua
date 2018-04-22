@@ -5,12 +5,12 @@ function GameState:enter()
 end
 
 function GameState:draw()
-    love.graphics.print("Welcome to Brick Quest", 175, 300)
+    love.graphics.print("You lose!", 175, 300)
 end
 
 function GameState:mousepressed()
     self.game_started = true
-    gs.switch(DungeonLevelState, 'dungeon_rooms/level1.lua')
+    gs.switch(GameStartState)
 end
 
 return GameState
