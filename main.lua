@@ -193,8 +193,10 @@ end
 
 DungeonRoomState = require 'states.dungeon_room'
 DungeonLevelState = require 'states.dungeon_level_map'
+GameStartState = require 'states.game_start'
 
 function love.load()
     gs.registerEvents()
-    gs.switch(DungeonLevelState, 'dungeon_rooms/level1.lua')
+    gs.switch(GameStartState, 'game_start.lua' )
 end
+--DungeonLevelState, 'dungeon_rooms/level1.lua'
