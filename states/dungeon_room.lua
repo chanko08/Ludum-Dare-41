@@ -1,10 +1,9 @@
-local bump = require 'lib.bump.bump'
-
 local DungeonRoomState = class({})
 
 function DungeonRoomState:enter(previous_state, dungeon_room)
     love.mouse.setRelativeMode(true)
 
+    self.dungeon_level = previous_state
     self.dungeon_room = dungeon_room
     self.game_started = false
 
@@ -45,6 +44,18 @@ function DungeonRoomState:update(dt)
                 self.world:add(entity.power_up, entity.power_up.x, entity.power_up.y, entity.power_up.w, entity.power_up.h)
             end
         end
+    end
+
+    local win = true
+    for entity, i in pairs(self.entities) do
+        if entity.is_block and entity.behavior.name == "kill_block" then
+            win = false
+            break
+        end
+    end
+
+    if win then
+        gs.switch(self.dungeon_level, nil, true)
     end
 end
 
@@ -254,7 +265,7 @@ function DungeonRoomState:load_dungeon_room(dungeon_room)
                 power_up_action = self.POWER_UP_BEHAVIORS[power_up.properties.name]
                 power_up.action = power_up_action
                 power_up_obj = self.ENTITIES['powerup.lua'](x, y, tile_width, tile_height, power_up, self)
-                print(inspect(power_up_obj))
+                --print(inspect(power_up_obj))
             end
 
 
