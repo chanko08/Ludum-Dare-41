@@ -13,3 +13,9 @@ Running source code on Linux
 -------------------------------------------
 * To run on linux you need to install the love2d platform here: https://love2d.org
 * After that, running `love .` inside the git repository will run the game
+
+
+Authors:
+-------------------------------------------
+* [Alex Bechanko](https://github.com/chanko08)
+* [Mike Minassian](https://github.com/minassbond) 
